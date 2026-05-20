@@ -1,0 +1,2355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EvoRank</title>
+
+    <style>
+        :root {
+            --bg: #030305;
+            --panel: rgba(16, 16, 22, 0.78);
+            --panel2: rgba(25, 25, 34, 0.76);
+            --text: #fff5f6;
+            --muted: #b7a8ad;
+            --line: rgba(255, 255, 255, 0.09);
+            --red: #ff003c;
+            --red2: #ff315f;
+            --red3: #7a001d;
+            --green: #35ff8a;
+            --yellow: #ffd166;
+            --blue: #57c7ff;
+            --radius: 24px;
+            --shadow: 0 22px 70px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 50% -10%, rgba(255, 0, 60, 0.36), transparent 28%),
+                radial-gradient(circle at 8% 18%, rgba(255, 49, 95, 0.17), transparent 28%),
+                radial-gradient(circle at 92% 80%, rgba(255, 0, 60, 0.13), transparent 32%),
+                linear-gradient(180deg, #060607 0%, #08080d 48%, #030305 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.92), transparent 86%);
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            width: 580px;
+            height: 580px;
+            right: -260px;
+            top: 160px;
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 0, 60, 0.18), transparent 65%);
+            filter: blur(10px);
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .onboarding,
+        .app-shell {
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 0, 60, 0.32);
+            border-radius: 999px;
+            background: rgba(255, 0, 60, 0.09);
+            color: #ffd7de;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 0.93rem;
+            line-height: 1.48;
+        }
+
+        .onboarding {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 22px;
+        }
+
+        .start-wrap {
+            width: min(1180px, 100%);
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .start-hero,
+        .start-card,
+        .card {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
+                radial-gradient(circle at top right, rgba(255, 0, 60, 0.18), transparent 45%);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .start-hero {
+            min-height: 560px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .start-hero::before,
+        .card::before,
+        .start-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+            transform: translateX(-120%);
+            transition: 0.7s ease;
+        }
+
+        .start-hero:hover::before,
+        .card:hover::before,
+        .start-card:hover::before {
+            transform: translateX(120%);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background:
+                radial-gradient(circle at 30% 20%, #ff9aae, transparent 28%),
+                linear-gradient(135deg, var(--red), var(--red3));
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: white;
+            font-weight: 950;
+            box-shadow:
+                0 0 26px rgba(255, 0, 60, 0.62),
+                inset 0 0 18px rgba(255, 255, 255, 0.13);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .brand h1 {
+            font-size: 1.22rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .brand p {
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .start-title {
+            margin-top: 28px;
+            font-size: clamp(3rem, 8vw, 6.6rem);
+            line-height: 0.88;
+            letter-spacing: -0.08em;
+            text-transform: uppercase;
+            text-shadow: 0 0 34px rgba(255, 0, 60, 0.32);
+        }
+
+        .start-title span {
+            color: var(--red2);
+        }
+
+        .start-text {
+            margin-top: 16px;
+            max-width: 680px;
+            color: var(--muted);
+            font-size: 1.04rem;
+            line-height: 1.55;
+        }
+
+        .feature-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .feature {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid var(--line);
+        }
+
+        .feature b {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .feature p {
+            color: var(--muted);
+            font-size: 0.86rem;
+            line-height: 1.35;
+        }
+
+        .start-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .start-card h2 {
+            font-size: 2rem;
+            margin: 18px 0 8px;
+            line-height: 1;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 16px 0 4px;
+        }
+
+        .auth-tab {
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d8cdd1;
+            transition: 0.16s ease;
+        }
+
+        .auth-tab:hover {
+            background: rgba(255, 0, 60, 0.12);
+            border-color: rgba(255, 0, 60, 0.34);
+            color: white;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, rgba(255, 0, 60, 0.9), rgba(90, 0, 20, 0.9));
+            color: white;
+            border-color: rgba(255, 0, 60, 0.5);
+        }
+
+        .form {
+            display: grid;
+            gap: 11px;
+            margin-top: 16px;
+        }
+
+        .input,
+        .select {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 16px;
+            outline: none;
+            color: white;
+            background: rgba(0, 0, 0, 0.34);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input::placeholder {
+            color: #786d71;
+        }
+
+        .input:focus,
+        .select:focus {
+            border-color: rgba(255, 0, 60, 0.8);
+            box-shadow: 0 0 0 4px rgba(255, 0, 60, 0.13);
+        }
+
+        .select option {
+            background: #0b0b0f;
+            color: white;
+        }
+
+        .btn {
+            min-height: 48px;
+            padding: 13px 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--red), #82001e);
+            color: white;
+            font-weight: 900;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 14px 34px rgba(255, 0, 60, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.16);
+            transition: 0.18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 18px 40px rgba(255, 0, 60, 0.36),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 0, 60, 0.12);
+            border-color: rgba(255, 0, 60, 0.34);
+        }
+
+        .btn.danger {
+            background: rgba(255, 0, 60, 0.15);
+            border: 1px solid rgba(255, 0, 60, 0.35);
+            color: #ffd7df;
+            box-shadow: none;
+        }
+
+        .mini-note {
+            margin-top: 12px;
+            color: #897d82;
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .success {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(53, 255, 138, 0.08);
+            border: 1px solid rgba(53, 255, 138, 0.22);
+            color: #d7ffe6;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .error {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(255, 0, 60, 0.1);
+            border: 1px solid rgba(255, 0, 60, 0.25);
+            color: #ffd7df;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 290px 1fr;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 18px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            background:
+                linear-gradient(180deg, rgba(10, 10, 14, 0.96), rgba(5, 5, 7, 0.92)),
+                radial-gradient(circle at top, rgba(255, 0, 60, 0.16), transparent 40%);
+            backdrop-filter: blur(18px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-mini {
+            padding: 16px;
+            border-radius: 22px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+                radial-gradient(circle at top right, rgba(255, 0, 60, 0.18), transparent 50%);
+            border: 1px solid var(--line);
+        }
+
+        .avatar-big {
+            width: 68px;
+            height: 68px;
+            border-radius: 22px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            font-weight: 950;
+            background:
+                radial-gradient(circle at 30% 20%, #ff9aae, transparent 28%),
+                linear-gradient(135deg, var(--red), var(--red3));
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.32);
+        }
+
+        .side-nav {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 16px;
+            color: #d8cdd1;
+            background: transparent;
+            border: 1px solid transparent;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.16s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.045);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-btn.active {
+            color: white;
+            background: linear-gradient(135deg, rgba(255, 0, 60, 0.9), rgba(90, 0, 20, 0.88));
+            border-color: rgba(255, 0, 60, 0.6);
+            box-shadow: 0 0 24px rgba(255, 0, 60, 0.22);
+        }
+
+        .side-footer {
+            margin-top: auto;
+            padding: 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid var(--line);
+        }
+
+        .main-area {
+            min-width: 0;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            min-height: 78px;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: rgba(3, 3, 5, 0.72);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .app-header h2 {
+            font-size: 1.35rem;
+        }
+
+        .top-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .stat-pill {
+            padding: 8px 11px;
+            border-radius: 999px;
+            background: rgba(255, 0, 60, 0.08);
+            border: 1px solid rgba(255, 0, 60, 0.22);
+            color: #fff1f4;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .mobile-tabs {
+            display: none;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(3, 3, 5, 0.76);
+        }
+
+        .mobile-tabs .nav-btn {
+            min-width: max-content;
+            border-radius: 999px;
+            padding: 10px 13px;
+        }
+
+        .container {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .page {
+            animation: fade 0.2s ease;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .card {
+            padding: 18px;
+        }
+
+        .card h2 {
+            font-size: 1.18rem;
+            margin-bottom: 8px;
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .hero-card {
+            min-height: 310px;
+            display: grid;
+            grid-template-columns: 1.35fr 0.65fr;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .hero-title {
+            margin: 14px 0 10px;
+            font-size: clamp(2.2rem, 5vw, 4.6rem);
+            line-height: 0.9;
+            letter-spacing: -0.07em;
+            text-transform: uppercase;
+        }
+
+        .hero-title span {
+            color: var(--red2);
+            text-shadow: 0 0 26px rgba(255, 0, 60, 0.38);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .rank-core {
+            min-height: 250px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 0, 60, 0.18);
+            background:
+                radial-gradient(circle at center, rgba(255, 0, 60, 0.22), transparent 58%),
+                rgba(0, 0, 0, 0.22);
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        .ring {
+            --p: 0deg;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background:
+                conic-gradient(var(--red) var(--p), rgba(255, 255, 255, 0.08) 0),
+                radial-gradient(circle, #15151c 58%, transparent 59%);
+            box-shadow:
+                0 0 34px rgba(255, 0, 60, 0.24),
+                inset 0 0 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .ring-inner {
+            width: 132px;
+            height: 132px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            background: rgba(3, 3, 5, 0.86);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ring-inner strong {
+            display: block;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .ring-inner span {
+            color: var(--muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stat-card {
+            padding: 16px;
+            min-height: 138px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: rgba(255, 0, 60, 0.12);
+            border: 1px solid rgba(255, 0, 60, 0.2);
+        }
+
+        .big-number {
+            margin-top: 10px;
+            font-size: 2rem;
+            font-weight: 950;
+            color: white;
+            text-shadow:
+                0 0 18px rgba(255, 0, 60, 0.4),
+                0 0 2px rgba(255, 255, 255, 0.55);
+        }
+
+        .red {
+            color: var(--red2);
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .yellow {
+            color: var(--yellow);
+        }
+
+        .blue {
+            color: var(--blue);
+        }
+
+        .progress {
+            width: 100%;
+            height: 12px;
+            margin-top: 12px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.075);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .progress span {
+            display: block;
+            width: 0%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--red), #ff6d8e);
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.56);
+            transition: 0.25s ease;
+        }
+
+        .list {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px;
+            border-radius: 17px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: 0.16s ease;
+        }
+
+        .item:hover {
+            border-color: rgba(255, 0, 60, 0.3);
+            background: rgba(255, 0, 60, 0.06);
+        }
+
+        .item strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .item small {
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .muscle-box {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .muscle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d3c7cb;
+            font-size: 0.9rem;
+        }
+
+        .muscle input {
+            accent-color: var(--red);
+        }
+
+        .body-stage {
+            min-height: 430px;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 0, 60, 0.18);
+            background:
+                radial-gradient(circle at 50% 18%, rgba(255, 0, 60, 0.20), transparent 36%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        .body-svg {
+            width: min(310px, 100%);
+            height: auto;
+            filter: drop-shadow(0 0 24px rgba(255, 0, 60, 0.2));
+        }
+
+        .body-svg .muscle-shape {
+            fill: rgba(255, 255, 255, 0.08);
+            stroke: rgba(255, 255, 255, 0.17);
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .body-svg .muscle-shape:hover {
+            fill: rgba(255, 0, 60, 0.23);
+            stroke: rgba(255, 100, 130, 0.8);
+        }
+
+        .body-svg .muscle-shape.active {
+            fill: rgba(255, 0, 60, 0.82);
+            stroke: rgba(255, 180, 195, 0.95);
+            filter: drop-shadow(0 0 10px rgba(255, 0, 60, 0.7));
+        }
+
+        .body-svg .line {
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1;
+        }
+
+        .body-label {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            z-index: 4;
+            padding: 10px 12px;
+            border-radius: 999px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #ffdce3;
+            background: rgba(5, 5, 8, 0.72);
+            border: 1px solid rgba(255, 0, 60, 0.24);
+        }
+
+        .muscle-info {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .challenge-grid,
+        .goal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .challenge,
+        .goal-card {
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: 0.16s ease;
+        }
+
+        .challenge:hover,
+        .goal-card:hover {
+            border-color: rgba(255, 0, 60, 0.32);
+            background: rgba(255, 0, 60, 0.06);
+        }
+
+        .challenge input {
+            width: 23px;
+            height: 23px;
+            accent-color: var(--red);
+        }
+
+        .challenge-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .challenge-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: rgba(255, 0, 60, 0.12);
+            border: 1px solid rgba(255, 0, 60, 0.22);
+            font-size: 1.2rem;
+        }
+
+        .podium {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            align-items: end;
+            margin-top: 14px;
+        }
+
+        .podium-card {
+            min-height: 150px;
+            padding: 15px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top, rgba(255, 0, 60, 0.18), transparent 55%),
+                rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .podium-card.first {
+            min-height: 190px;
+            border-color: rgba(255, 0, 60, 0.28);
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.16);
+        }
+
+        .place {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 10px;
+            border-radius: 16px;
+            font-weight: 950;
+            background: linear-gradient(135deg, var(--red), var(--red3));
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.28);
+        }
+
+        .rank-row {
+            display: grid;
+            grid-template-columns: 46px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 13px;
+            border-radius: 17px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .rank-avatar {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            font-weight: 950;
+            background:
+                radial-gradient(circle at 30% 25%, #ff9aae, transparent 25%),
+                linear-gradient(135deg, var(--red), var(--red3));
+            box-shadow: 0 0 18px rgba(255, 0, 60, 0.28);
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .badge {
+            min-height: 128px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 12px;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at 50% 8%, rgba(255, 0, 60, 0.34), transparent 44%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+            border: 1px solid rgba(255, 0, 60, 0.16);
+        }
+
+        .badge:not(.locked) {
+            box-shadow:
+                0 0 24px rgba(255, 0, 60, 0.2),
+                inset 0 0 26px rgba(255, 0, 60, 0.08);
+        }
+
+        .badge.locked {
+            filter: grayscale(1);
+            opacity: 0.36;
+        }
+
+        .badge .icon {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 7px;
+            filter: drop-shadow(0 0 12px rgba(255, 0, 60, 0.45));
+        }
+
+        .profile-panel {
+            display: grid;
+            grid-template-columns: 0.85fr 1.15fr;
+            gap: 14px;
+        }
+
+        .profile-card-large {
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background:
+                radial-gradient(circle at top, rgba(255, 0, 60, 0.2), transparent 52%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025));
+        }
+
+        .profile-avatar-xl {
+            width: 108px;
+            height: 108px;
+            display: grid;
+            place-items: center;
+            border-radius: 32px;
+            font-size: 2.3rem;
+            font-weight: 950;
+            background:
+                radial-gradient(circle at 30% 20%, #ff9aae, transparent 28%),
+                linear-gradient(135deg, var(--red), var(--red3));
+            box-shadow: 0 0 42px rgba(255, 0, 60, 0.28);
+            margin-bottom: 14px;
+        }
+
+        .two-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 1050px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .mobile-tabs {
+                display: flex;
+            }
+
+            .grid-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 850px) {
+
+            .start-wrap,
+            .hero-card,
+            .grid-2,
+            .grid-3,
+            .profile-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .start-hero {
+                min-height: auto;
+            }
+
+            .feature-strip,
+            .challenge-grid,
+            .goal-grid,
+            .podium {
+                grid-template-columns: 1fr;
+            }
+
+            .app-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .top-stats {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .container {
+                padding: 14px;
+            }
+
+            .grid-4,
+            .badge-grid,
+            .muscle-box {
+                grid-template-columns: 1fr;
+            }
+
+            .item {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .start-title {
+                font-size: 3.3rem;
+            }
+
+            .hero-title {
+                font-size: 2.65rem;
+            }
+
+            .ring {
+                width: 160px;
+                height: 160px;
+            }
+
+            .ring-inner {
+                width: 118px;
+                height: 118px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section id="onboarding" class="onboarding">
+        <div class="start-wrap">
+            <div class="start-hero">
+                <div>
+                    <div class="brand">
+                        <div class="logo">E</div>
+                        <div>
+                            <h1>EvoRank</h1>
+                            <p>Seu jogo de evolução pessoal</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 34px;">
+                        <div class="eyebrow">modo evolução ativado</div>
+                        <h2 class="start-title">Suba.<br><span>Domine.</span><br>Evolua.</h2>
+                        <p class="start-text">
+                            Treino, nutrição, metas, desafios, XP, ranking e medalhas.
+                            O pré-registro fica em um site separado, acessado por botão.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="feature-strip">
+                    <div class="feature">
+                        <b>🔥 XP</b>
+                        <p>Ganhe pontos por treinos, refeições, desafios e metas.</p>
+                    </div>
+                    <div class="feature">
+                        <b>🎯 Metas</b>
+                        <p>Crie objetivos e acompanhe progresso real.</p>
+                    </div>
+                    <div class="feature">
+                        <b>💎 Pré-registro</b>
+                        <p>Botão direto para o site externo de pré-lançamento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="start-card">
+                <div class="eyebrow">acesso local</div>
+                <h2>EvoRank MVP</h2>
+                <p class="muted">
+                    Essa versão usa contas locais no navegador. Depois trocamos por banco de dados real.
+                </p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-auth="register">Criar conta</button>
+                    <button class="auth-tab" data-auth="login">Entrar</button>
+                    <button class="auth-tab" data-auth="prereg">Pré-registro</button>
+                </div>
+
+                <form id="registerForm" class="form">
+                    <input id="regName" class="input" placeholder="Seu nome" required />
+                    <input id="regEmail" class="input" type="email" placeholder="Seu e-mail" required />
+                    <select id="regGender" class="select" required>
+                        <option value="">Escolha seu perfil</option>
+                        <option value="Homem">Homem</option>
+                        <option value="Mulher">Mulher</option>
+                    </select>
+                    <button class="btn" type="submit">Criar conta local</button>
+                </form>
+
+                <form id="loginForm" class="form hidden">
+                    <input id="loginEmail" class="input" type="email" placeholder="E-mail da conta local" required />
+                    <button class="btn" type="submit">Entrar</button>
+                </form>
+
+                <div id="authMessage"></div>
+
+                <p class="mini-note">
+                    Para ativar o botão de pré-registro, troque o link na variável PRE_REGISTER_URL no JavaScript.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="app" class="app-shell hidden">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">E</div>
+                <div>
+                    <h1>EvoRank</h1>
+                    <p>Dark red edition</p>
+                </div>
+            </div>
+
+            <div class="profile-mini">
+                <div class="avatar-big" id="sideInitial">E</div>
+                <h3 id="sideName">Usuário</h3>
+                <p class="muted" id="sideRank">Rookie</p>
+                <div class="progress">
+                    <span id="sideProgress"></span>
+                </div>
+            </div>
+
+            <nav class="side-nav">
+                <button class="nav-btn active" data-page="dashboard">⚡ Início</button>
+                <button class="nav-btn" data-page="treino">💪 Treino</button>
+                <button class="nav-btn" data-page="nutricao">🍽️ Nutrição</button>
+                <button class="nav-btn" data-page="metas">🎯 Metas</button>
+                <button class="nav-btn" data-page="desafios">🔥 Desafios</button>
+                <button class="nav-btn" data-page="preregistro">💎 Pré-registro</button>
+                <button class="nav-btn" data-page="ranking">🏆 Ranking</button>
+                <button class="nav-btn" data-page="perfil">👤 Perfil</button>
+            </nav>
+
+            <div class="side-footer">
+                <strong>Missão principal</strong>
+                <p class="muted">Faça pelo menos 1 ação hoje para manter sua evolução viva.</p>
+            </div>
+        </aside>
+
+        <section class="main-area">
+            <header class="app-header">
+                <div>
+                    <div class="eyebrow" id="pageEyebrow">visão geral</div>
+                    <h2 id="pageTitle">Início</h2>
+                </div>
+
+                <div class="top-stats">
+                    <div class="stat-pill">Nível <b id="topLevel">1</b></div>
+                    <div class="stat-pill"><b id="topXp">0</b> XP</div>
+                    <div class="stat-pill"><b id="topStreak">0</b> dias</div>
+                </div>
+            </header>
+
+            <nav class="mobile-tabs">
+                <button class="nav-btn active" data-page="dashboard">⚡ Início</button>
+                <button class="nav-btn" data-page="treino">💪 Treino</button>
+                <button class="nav-btn" data-page="nutricao">🍽️ Nutrição</button>
+                <button class="nav-btn" data-page="metas">🎯 Metas</button>
+                <button class="nav-btn" data-page="desafios">🔥 Desafios</button>
+                <button class="nav-btn" data-page="preregistro">💎 Pré</button>
+                <button class="nav-btn" data-page="ranking">🏆 Ranking</button>
+                <button class="nav-btn" data-page="perfil">👤 Perfil</button>
+            </nav>
+
+            <main class="container">
+                <section id="dashboard" class="page">
+                    <div class="card hero-card">
+                        <div>
+                            <div class="eyebrow">temporada pessoal</div>
+                            <h2 class="hero-title">Hoje é dia de <span>subir no rank.</span></h2>
+                            <p class="muted">
+                                Registre suas ações, acompanhe metas, complete desafios e veja o corpo trabalhado.
+                            </p>
+
+                            <div class="hero-actions">
+                                <button class="btn" onclick="goPage('treino')">Registrar treino</button>
+                                <button class="btn secondary" onclick="goPage('metas')">Ver metas</button>
+                                <button class="btn secondary" onclick="openPreRegister()">Pré-registro</button>
+                            </div>
+                        </div>
+
+                        <div class="rank-core">
+                            <div>
+                                <div class="ring" id="levelRing">
+                                    <div class="ring-inner">
+                                        <div>
+                                            <strong id="ringLevel">1</strong>
+                                            <span>Nível atual</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="muted" id="levelText" style="text-align:center; margin-top:12px;">
+                                    Faltam 250 XP para o próximo nível.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-4" style="margin-top:14px;">
+                        <div class="card stat-card">
+                            <div class="stat-icon">⚡</div>
+                            <div>
+                                <p class="muted">XP total</p>
+                                <div class="big-number red" id="dashXp">0</div>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card">
+                            <div class="stat-icon">🍽️</div>
+                            <div>
+                                <p class="muted">Calorias hoje</p>
+                                <div class="big-number green" id="dashCalories">0</div>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card">
+                            <div class="stat-icon">💪</div>
+                            <div>
+                                <p class="muted">Treinos hoje</p>
+                                <div class="big-number yellow" id="dashWorkouts">0</div>
+                            </div>
+                        </div>
+
+                        <div class="card stat-card">
+                            <div class="stat-icon">🎯</div>
+                            <div>
+                                <p class="muted">Metas ativas</p>
+                                <div class="big-number blue" id="dashGoals">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2" style="margin-top:14px;">
+                        <div class="card">
+                            <h2>Progresso do nível</h2>
+                            <p class="muted">Cada ação empurra você para o próximo nível.</p>
+                            <div class="progress">
+                                <span id="levelProgress"></span>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h2>Atividade recente</h2>
+                            <div id="recentList" class="list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="treino" class="page hidden">
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="eyebrow">registro de treino</div>
+                            <h2 style="margin-top:12px;">Registrar treino</h2>
+                            <p class="muted">Registre o treino, marque os músculos e ganhe XP.</p>
+
+                            <form id="workoutForm" class="form">
+                                <input id="exerciseInput" class="input" placeholder="Ex: Peito, corrida, basquete..."
+                                    required />
+                                <input id="minutesInput" class="input" type="number" min="1"
+                                    placeholder="Duração em minutos" required />
+
+                                <select id="intensityInput" class="select">
+                                    <option value="leve">Leve</option>
+                                    <option value="medio">Médio</option>
+                                    <option value="pesado">Pesado</option>
+                                </select>
+
+                                <div>
+                                    <p class="muted">Músculos trabalhados:</p>
+                                    <div class="muscle-box">
+                                        <label class="muscle"><input type="checkbox" value="Peito"> Peito</label>
+                                        <label class="muscle"><input type="checkbox" value="Costas"> Costas</label>
+                                        <label class="muscle"><input type="checkbox" value="Bíceps"> Bíceps</label>
+                                        <label class="muscle"><input type="checkbox" value="Tríceps"> Tríceps</label>
+                                        <label class="muscle"><input type="checkbox" value="Ombro"> Ombro</label>
+                                        <label class="muscle"><input type="checkbox" value="Pernas"> Pernas</label>
+                                        <label class="muscle"><input type="checkbox" value="Abdômen"> Abdômen</label>
+                                        <label class="muscle"><input type="checkbox" value="Cardio"> Cardio</label>
+                                    </div>
+                                </div>
+
+                                <button class="btn" type="submit">Salvar treino</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="eyebrow">mapa corporal svg</div>
+                            <h2 style="margin-top:12px;">Corpo trabalhado</h2>
+                            <p class="muted">Clique em uma parte do corpo para ver informações.</p>
+
+                            <div class="body-stage" style="margin-top:14px;">
+                                <svg class="body-svg" viewBox="0 0 260 420" aria-label="Corpo humano estilizado">
+                                    <line class="line" x1="130" y1="20" x2="130" y2="395"></line>
+
+                                    <circle class="muscle-shape" data-muscle="Cabeça" cx="130" cy="42" r="28"></circle>
+
+                                    <path class="muscle-shape" data-muscle="Ombro"
+                                        d="M72 95 C82 72, 110 72, 118 93 L106 126 C91 122, 76 113, 72 95Z"></path>
+                                    <path class="muscle-shape" data-muscle="Ombro"
+                                        d="M188 95 C178 72, 150 72, 142 93 L154 126 C169 122, 184 113, 188 95Z"></path>
+
+                                    <path class="muscle-shape" data-muscle="Peito"
+                                        d="M94 92 C112 80, 125 88, 130 102 C135 88, 148 80, 166 92 C168 122, 154 144, 130 146 C106 144, 92 122, 94 92Z">
+                                    </path>
+
+                                    <path class="muscle-shape" data-muscle="Abdômen"
+                                        d="M104 148 C118 155, 142 155, 156 148 C160 184, 153 221, 130 230 C107 221, 100 184, 104 148Z">
+                                    </path>
+
+                                    <path class="muscle-shape" data-muscle="Bíceps"
+                                        d="M70 122 C58 148, 54 184, 62 222 C78 219, 86 198, 86 164 C86 144, 82 130, 70 122Z">
+                                    </path>
+                                    <path class="muscle-shape" data-muscle="Tríceps"
+                                        d="M190 122 C202 148, 206 184, 198 222 C182 219, 174 198, 174 164 C174 144, 178 130, 190 122Z">
+                                    </path>
+
+                                    <path class="muscle-shape" data-muscle="Costas"
+                                        d="M100 230 C118 238, 142 238, 160 230 L168 268 C150 282, 110 282, 92 268Z">
+                                    </path>
+
+                                    <path class="muscle-shape" data-muscle="Pernas"
+                                        d="M102 276 C116 282, 127 282, 132 276 L123 394 C105 396, 94 384, 96 362Z">
+                                    </path>
+                                    <path class="muscle-shape" data-muscle="Pernas"
+                                        d="M158 276 C144 282, 133 282, 128 276 L137 394 C155 396, 166 384, 164 362Z">
+                                    </path>
+
+                                    <path class="muscle-shape" data-muscle="Cardio"
+                                        d="M130 107 C137 94, 160 102, 156 124 C153 143, 130 154, 130 154 C130 154, 107 143, 104 124 C100 102, 123 94, 130 107Z">
+                                    </path>
+                                </svg>
+
+                                <div class="body-label" id="bodyLabel">Nenhum músculo registrado hoje</div>
+                            </div>
+
+                            <div class="muscle-info" id="muscleInfo">
+                                <strong>Selecione uma parte do corpo</strong>
+                                <p class="muted">Ao clicar no SVG, aparecerá uma descrição rápida do músculo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:14px;">
+                        <h2>Histórico de treinos</h2>
+                        <div id="workoutList" class="list"></div>
+                    </div>
+                </section>
+
+                <section id="nutricao" class="page hidden">
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="eyebrow">nutrição</div>
+                            <h2 style="margin-top:12px;">Registrar refeição</h2>
+                            <p class="muted">Coloque o alimento e uma estimativa de calorias.</p>
+
+                            <form id="mealForm" class="form">
+                                <input id="mealNameInput" class="input" placeholder="Ex: arroz, feijão e frango"
+                                    required />
+                                <input id="mealCaloriesInput" class="input" type="number" min="1" placeholder="Calorias"
+                                    required />
+                                <button class="btn" type="submit">Salvar refeição</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="eyebrow">resumo diário</div>
+                            <h2 style="margin-top:12px;">Calorias de hoje</h2>
+                            <div class="big-number green" id="nutritionCalories">0 kcal</div>
+                            <p class="muted">Meta visual usando 3000 kcal como base.</p>
+
+                            <div class="progress">
+                                <span id="calorieProgress"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top:14px;">
+                        <h2>Refeições registradas</h2>
+                        <div id="mealList" class="list"></div>
+                    </div>
+                </section>
+
+                <section id="metas" class="page hidden">
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="eyebrow">sistema de metas</div>
+                            <h2 style="margin-top:12px;">Criar meta</h2>
+                            <p class="muted">Crie objetivos para XP, treinos, calorias ou metas manuais.</p>
+
+                            <form id="goalForm" class="form">
+                                <input id="goalTitle" class="input" placeholder="Ex: Chegar em 1000 XP" required />
+
+                                <select id="goalType" class="select" required>
+                                    <option value="xp">XP total</option>
+                                    <option value="workouts">Quantidade de treinos</option>
+                                    <option value="calories">Calorias de hoje</option>
+                                    <option value="custom">Manual</option>
+                                </select>
+
+                                <input id="goalTarget" class="input" type="number" min="1" placeholder="Meta numérica"
+                                    required />
+                                <button class="btn" type="submit">Criar meta</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="eyebrow">progresso</div>
+                            <h2 style="margin-top:12px;">Metas ativas</h2>
+                            <p class="muted">As metas de XP, treino e calorias atualizam automaticamente.</p>
+                            <div class="big-number red" id="activeGoalCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="goal-grid" id="goalList"></div>
+                </section>
+
+                <section id="desafios" class="page hidden">
+                    <div class="card">
+                        <div class="eyebrow">missões diárias</div>
+                        <h2 style="margin-top:12px;">Desafios de hoje</h2>
+                        <p class="muted">Complete desafios para ganhar XP extra. Eles resetam no dia seguinte.</p>
+
+                        <div class="challenge-grid">
+                            <label class="challenge">
+                                <div class="challenge-top">
+                                    <div class="challenge-icon">💪</div>
+                                    <input type="checkbox" data-challenge="treino" data-xp="40">
+                                </div>
+                                <div>
+                                    <strong>Fazer 1 treino hoje</strong>
+                                    <p class="muted">+40 XP</p>
+                                </div>
+                            </label>
+
+                            <label class="challenge">
+                                <div class="challenge-top">
+                                    <div class="challenge-icon">🍽️</div>
+                                    <input type="checkbox" data-challenge="refeicao" data-xp="25">
+                                </div>
+                                <div>
+                                    <strong>Registrar 1 refeição</strong>
+                                    <p class="muted">+25 XP</p>
+                                </div>
+                            </label>
+
+                            <label class="challenge">
+                                <div class="challenge-top">
+                                    <div class="challenge-icon">🔥</div>
+                                    <input type="checkbox" data-challenge="foco" data-xp="30">
+                                </div>
+                                <div>
+                                    <strong>Dia sem desistir</strong>
+                                    <p class="muted">+30 XP</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="ranking" class="page hidden">
+                    <div class="card">
+                        <div class="eyebrow">competição</div>
+                        <h2 style="margin-top:12px;">Ranking semanal</h2>
+                        <p class="muted">Agora o ranking usa sua conta local e também mostra competidores demo.</p>
+
+                        <div id="podium" class="podium"></div>
+                        <div id="rankingList" class="list" style="margin-top:14px;"></div>
+                    </div>
+                </section>
+
+                <section id="perfil" class="page hidden">
+                    <div class="profile-panel">
+                        <div class="card profile-card-large">
+                            <div>
+                                <div class="profile-avatar-xl" id="profileInitial">E</div>
+                                <p class="muted">Nome</p>
+                                <div class="big-number" id="profileName">Usuário</div>
+
+                                <p class="muted">E-mail</p>
+                                <h3 id="profileEmail">-</h3>
+
+                                <p class="muted">Categoria</p>
+                                <h3 id="profileGender">-</h3>
+
+                                <p class="muted">Rank atual</p>
+                                <h3 id="profileRank">Rookie</h3>
+                            </div>
+
+                            <div class="two-buttons">
+                                <button class="btn secondary" onclick="logout()">Sair</button>
+                                <button class="btn danger" onclick="resetAccount()">Resetar conta</button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="eyebrow">conquistas</div>
+                            <h2 style="margin-top:12px;">Medalhas</h2>
+                            <p class="muted">As medalhas ainda estão leves, mas já possuem lógica de desbloqueio.</p>
+
+                            <div class="badge-grid" id="badgeGrid"></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </section>
+    </section>
+
+    <script>
+        const USERS_KEY = "evorank_users_v5";
+        const SESSION_KEY = "evorank_session_v5";
+
+        /*
+          TROQUE SÓ ESSA LINHA PELO LINK REAL DO SEU SITE DE PRÉ-REGISTRO.
+          Exemplo:
+          const PRE_REGISTER_URL = "https://seusite.com/pre-registro";
+        */
+        const PRE_REGISTER_URL = "COLE_AQUI_O_LINK_DO_SEU_SITE_DE_PRE_REGISTRO";
+
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+        const todayKey = () => new Date().toISOString().slice(0, 10);
+
+        const uid = () => {
+            if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+            return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+        };
+
+        const pageInfo = {
+            dashboard: ["visão geral", "Início"],
+            treino: ["corpo em ação", "Treino"],
+            nutricao: ["energia e foco", "Nutrição"],
+            metas: ["objetivos", "Metas"],
+            desafios: ["missões diárias", "Desafios"],
+            ranking: ["competição", "Ranking"],
+            perfil: ["identidade", "Perfil"]
+        };
+
+        const muscleInfo = {
+            "Peito": "Peito: muito usado em flexões, supino e movimentos de empurrar.",
+            "Costas": "Costas: importante para postura, puxadas, remadas e estabilidade.",
+            "Bíceps": "Bíceps: usado em puxadas, roscas e movimentos de flexão do braço.",
+            "Tríceps": "Tríceps: usado em empurrões, flexões e extensão do braço.",
+            "Ombro": "Ombro: usado em elevações, desenvolvimento e estabilidade do braço.",
+            "Pernas": "Pernas: base de força, corrida, agachamento, salto e resistência.",
+            "Abdômen": "Abdômen: centro do corpo, ajuda em estabilidade e controle.",
+            "Cardio": "Cardio: trabalha resistência, coração, fôlego e gasto calórico.",
+            "Cabeça": "Cabeça: aqui é só visual. O foco real é manter a mentalidade forte."
+        };
+
+        let state = null;
+
+        function defaultUser({ name, email, gender }) {
+            return {
+                id: uid(),
+                name,
+                email: email.toLowerCase(),
+                gender,
+                xp: 0,
+                streak: 0,
+                lastActive: null,
+                meals: [],
+                workouts: [],
+                goals: [],
+                daily: {
+                    date: todayKey(),
+                    completed: {}
+                },
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        function getUsers() {
+            try {
+                return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function saveState() {
+            const users = getUsers();
+            const index = users.findIndex(user => user.id === state.id);
+
+            if (index >= 0) {
+                users[index] = state;
+                saveUsers(users);
+            }
+        }
+
+        function loadSession() {
+            const sessionId = localStorage.getItem(SESSION_KEY);
+            if (!sessionId) return null;
+
+            const user = getUsers().find(item => item.id === sessionId);
+            return user || null;
+        }
+
+        function setMessage(text, type = "success") {
+            $("#authMessage").innerHTML = `<div class="${type}">${text}</div>`;
+        }
+
+        function normalizeEmail(email) {
+            return String(email).trim().toLowerCase();
+        }
+
+        function openPreRegister() {
+            if (!PRE_REGISTER_URL || PRE_REGISTER_URL.includes("COLE_AQUI")) {
+                alert("Coloque o link real do seu site de pré-registro na variável PRE_REGISTER_URL.");
+                return;
+            }
+
+            window.location.href = PRE_REGISTER_URL;
+        }
+
+        $$(".auth-tab").forEach(tab => {
+            tab.addEventListener("click", () => {
+                const type = tab.dataset.auth;
+
+                if (type === "prereg") {
+                    openPreRegister();
+                    return;
+                }
+
+                $$(".auth-tab").forEach(item => item.classList.toggle("active", item.dataset.auth === type));
+                $("#registerForm").classList.toggle("hidden", type !== "register");
+                $("#loginForm").classList.toggle("hidden", type !== "login");
+                $("#authMessage").innerHTML = "";
+            });
+        });
+
+        $("#registerForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const name = $("#regName").value.trim();
+            const email = normalizeEmail($("#regEmail").value);
+            const gender = $("#regGender").value;
+
+            if (!name || !email || !gender) return;
+
+            const users = getUsers();
+
+            if (users.some(user => user.email === email)) {
+                setMessage("Esse e-mail já tem uma conta local. Use a aba Entrar.", "error");
+                return;
+            }
+
+            const user = defaultUser({ name, email, gender });
+            users.push(user);
+            saveUsers(users);
+            localStorage.setItem(SESSION_KEY, user.id);
+
+            state = user;
+            showApp();
+        });
+
+        $("#loginForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const email = normalizeEmail($("#loginEmail").value);
+            const user = getUsers().find(item => item.email === email);
+
+            if (!user) {
+                setMessage("Não encontrei conta local com esse e-mail.", "error");
+                return;
+            }
+
+            localStorage.setItem(SESSION_KEY, user.id);
+            state = user;
+            showApp();
+        });
+
+        function ensureDailyReset() {
+            if (!state.daily || state.daily.date !== todayKey()) {
+                state.daily = {
+                    date: todayKey(),
+                    completed: {}
+                };
+                saveState();
+            }
+        }
+
+        function levelFromXp(xp) {
+            return Math.floor(xp / 250) + 1;
+        }
+
+        function xpIntoLevel(xp) {
+            return xp % 250;
+        }
+
+        function rankName(xp) {
+            if (xp >= 2500) return "Lendário";
+            if (xp >= 1500) return "Titã";
+            if (xp >= 800) return "Elite";
+            if (xp >= 400) return "Ascendente";
+            if (xp >= 150) return "Rookie Avançado";
+            return "Rookie";
+        }
+
+        function addXp(amount) {
+            state.xp += amount;
+            updateStreak();
+            saveState();
+            renderAll();
+        }
+
+        function updateStreak() {
+            const today = todayKey();
+            if (state.lastActive === today) return;
+
+            const yesterdayDate = new Date();
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yesterday = yesterdayDate.toISOString().slice(0, 10);
+
+            if (state.lastActive === yesterday) {
+                state.streak += 1;
+            } else {
+                state.streak = 1;
+            }
+
+            state.lastActive = today;
+        }
+
+        function getTodayMeals() {
+            return state.meals.filter(item => item.date === todayKey());
+        }
+
+        function getTodayWorkouts() {
+            return state.workouts.filter(item => item.date === todayKey());
+        }
+
+        function todayCalories() {
+            return getTodayMeals().reduce((sum, item) => sum + Number(item.calories), 0);
+        }
+
+        function showApp() {
+            $("#onboarding").classList.add("hidden");
+            $("#app").classList.remove("hidden");
+            renderAll();
+        }
+
+        function showOnboarding() {
+            $("#onboarding").classList.remove("hidden");
+            $("#app").classList.add("hidden");
+        }
+
+        $$(".nav-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                const page = button.dataset.page;
+                if (page) goPage(page);
+            });
+        });
+
+        function goPage(pageId) {
+            if (pageId === "preregistro") {
+                openPreRegister();
+                return;
+            }
+
+            $$(".nav-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.page === pageId);
+            });
+
+            $$(".page").forEach(page => {
+                page.classList.toggle("hidden", page.id !== pageId);
+            });
+
+            $("#pageEyebrow").textContent = pageInfo[pageId][0];
+            $("#pageTitle").textContent = pageInfo[pageId][1];
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        $("#mealForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const name = $("#mealNameInput").value.trim();
+            const calories = Number($("#mealCaloriesInput").value);
+
+            if (!name || !calories) return;
+
+            state.meals.unshift({
+                id: uid(),
+                name,
+                calories,
+                date: todayKey(),
+                time: new Date().toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+            });
+
+            $("#mealNameInput").value = "";
+            $("#mealCaloriesInput").value = "";
+
+            addXp(10);
+        });
+
+        $("#workoutForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const exercise = $("#exerciseInput").value.trim();
+            const minutes = Number($("#minutesInput").value);
+            const intensity = $("#intensityInput").value;
+
+            if (!exercise || !minutes) return;
+
+            const selectedMuscles = [...document.querySelectorAll(".muscle input:checked")]
+                .map(input => input.value);
+
+            const intensityMultiplier = {
+                leve: 4,
+                medio: 7,
+                pesado: 10
+            };
+
+            const burned = minutes * intensityMultiplier[intensity];
+            const xp = Math.round(minutes * 2 + burned / 12);
+
+            state.workouts.unshift({
+                id: uid(),
+                exercise,
+                minutes,
+                intensity,
+                muscles: selectedMuscles,
+                burned,
+                xp,
+                date: todayKey(),
+                time: new Date().toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+            });
+
+            $("#exerciseInput").value = "";
+            $("#minutesInput").value = "";
+            document.querySelectorAll(".muscle input").forEach(input => input.checked = false);
+
+            addXp(xp);
+        });
+
+        $("#goalForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const title = $("#goalTitle").value.trim();
+            const type = $("#goalType").value;
+            const target = Number($("#goalTarget").value);
+
+            if (!title || !target) return;
+
+            state.goals.unshift({
+                id: uid(),
+                title,
+                type,
+                target,
+                current: 0,
+                completed: false,
+                createdAt: new Date().toISOString()
+            });
+
+            $("#goalTitle").value = "";
+            $("#goalTarget").value = "";
+
+            addXp(15);
+        });
+
+        document.querySelectorAll("[data-challenge]").forEach(input => {
+            input.addEventListener("change", () => {
+                const key = input.dataset.challenge;
+                const xp = Number(input.dataset.xp);
+
+                if (input.checked && !state.daily.completed[key]) {
+                    state.daily.completed[key] = true;
+                    addXp(xp);
+                }
+
+                if (!input.checked && state.daily.completed[key]) {
+                    input.checked = true;
+                }
+            });
+        });
+
+        document.querySelectorAll(".body-svg .muscle-shape").forEach(shape => {
+            shape.addEventListener("click", () => {
+                const muscle = shape.dataset.muscle;
+                $("#muscleInfo").innerHTML = `
+          <strong>${escapeHtml(muscle)}</strong>
+          <p class="muted">${escapeHtml(muscleInfo[muscle] || "Área selecionada.")}</p>
+        `;
+            });
+        });
+
+        function removeMeal(id) {
+            state.meals = state.meals.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+        }
+
+        function removeWorkout(id) {
+            state.workouts = state.workouts.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+        }
+
+        function removeGoal(id) {
+            state.goals = state.goals.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+        }
+
+        function addGoalProgress(id, amount) {
+            const goal = state.goals.find(item => item.id === id);
+            if (!goal) return;
+
+            goal.current += amount;
+
+            if (goal.current >= goal.target && !goal.completed) {
+                goal.completed = true;
+                addXp(60);
+                return;
+            }
+
+            saveState();
+            renderAll();
+        }
+
+        function completeGoal(id) {
+            const goal = state.goals.find(item => item.id === id);
+            if (!goal || goal.completed) return;
+
+            goal.completed = true;
+            addXp(60);
+        }
+
+        function getGoalProgress(goal) {
+            if (goal.type === "xp") return state.xp;
+            if (goal.type === "workouts") return state.workouts.length;
+            if (goal.type === "calories") return todayCalories();
+            return goal.current || 0;
+        }
+
+        function resetAccount() {
+            const ok = confirm("Tem certeza que deseja resetar sua conta local?");
+            if (!ok) return;
+
+            const users = getUsers().filter(user => user.id !== state.id);
+            saveUsers(users);
+            localStorage.removeItem(SESSION_KEY);
+            state = null;
+            location.reload();
+        }
+
+        function logout() {
+            localStorage.removeItem(SESSION_KEY);
+            state = null;
+            location.reload();
+        }
+
+        function renderAll() {
+            ensureDailyReset();
+
+            if (!state) {
+                showOnboarding();
+                return;
+            }
+
+            renderHeader();
+            renderDashboard();
+            renderMeals();
+            renderWorkouts();
+            renderGoals();
+            renderChallenges();
+            renderRanking();
+            renderProfile();
+        }
+
+        function renderHeader() {
+            const level = levelFromXp(state.xp);
+            const levelXp = xpIntoLevel(state.xp);
+            const percent = Math.min(100, (levelXp / 250) * 100);
+
+            $("#topLevel").textContent = level;
+            $("#topXp").textContent = state.xp;
+            $("#topStreak").textContent = state.streak;
+
+            $("#sideInitial").textContent = state.name.slice(0, 1).toUpperCase();
+            $("#sideName").textContent = state.name;
+            $("#sideRank").textContent = rankName(state.xp);
+            $("#sideProgress").style.width = `${percent}%`;
+        }
+
+        function renderDashboard() {
+            const level = levelFromXp(state.xp);
+            const levelXp = xpIntoLevel(state.xp);
+            const percent = Math.min(100, (levelXp / 250) * 100);
+            const missing = 250 - levelXp;
+
+            $("#dashXp").textContent = state.xp;
+            $("#dashCalories").textContent = todayCalories();
+            $("#dashWorkouts").textContent = getTodayWorkouts().length;
+            $("#dashGoals").textContent = state.goals.filter(goal => !goal.completed).length;
+
+            $("#ringLevel").textContent = level;
+            $("#levelText").textContent = `Faltam ${missing} XP para o próximo nível.`;
+            $("#levelProgress").style.width = `${percent}%`;
+            $("#levelRing").style.setProperty("--p", `${percent * 3.6}deg`);
+
+            renderRecent();
+        }
+
+        function renderRecent() {
+            const recent = [
+                ...state.workouts.slice(0, 3).map(w => ({
+                    type: "Treino",
+                    title: w.exercise,
+                    detail: `${w.minutes} min · +${w.xp} XP`
+                })),
+                ...state.meals.slice(0, 3).map(m => ({
+                    type: "Refeição",
+                    title: m.name,
+                    detail: `${m.calories} kcal · +10 XP`
+                })),
+                ...state.goals.slice(0, 2).map(g => ({
+                    type: "Meta",
+                    title: g.title,
+                    detail: g.completed ? "Concluída" : "Em progresso"
+                }))
+            ].slice(0, 4);
+
+            if (!recent.length) {
+                $("#recentList").innerHTML = `<p class="muted">Nenhuma atividade ainda. Registre algo para começar.</p>`;
+                return;
+            }
+
+            $("#recentList").innerHTML = recent.map(item => `
+        <div class="item">
+          <div>
+            <strong>${escapeHtml(item.title)}</strong>
+            <small>${item.type} · ${item.detail}</small>
+          </div>
+        </div>
+      `).join("");
+        }
+
+        function renderMeals() {
+            const meals = getTodayMeals();
+
+            $("#nutritionCalories").textContent = `${todayCalories()} kcal`;
+            $("#calorieProgress").style.width = `${Math.min(100, todayCalories() / 3000 * 100)}%`;
+
+            if (!meals.length) {
+                $("#mealList").innerHTML = `<p class="muted">Nenhuma refeição registrada hoje.</p>`;
+                return;
+            }
+
+            $("#mealList").innerHTML = meals.map(meal => `
+        <div class="item">
+          <div>
+            <strong>${escapeHtml(meal.name)}</strong>
+            <small>${meal.time} · ${meal.calories} kcal</small>
+          </div>
+          <button class="btn secondary" onclick="removeMeal('${meal.id}')">Remover</button>
+        </div>
+      `).join("");
+        }
+
+        function renderWorkouts() {
+            const workouts = getTodayWorkouts();
+
+            if (!workouts.length) {
+                $("#workoutList").innerHTML = `<p class="muted">Nenhum treino registrado hoje.</p>`;
+                $("#bodyLabel").textContent = "Nenhum músculo registrado hoje";
+                document.querySelectorAll(".body-svg .muscle-shape").forEach(part => part.classList.remove("active"));
+                return;
+            }
+
+            const muscles = [...new Set(workouts.flatMap(item => item.muscles))];
+
+            $("#bodyLabel").textContent = muscles.length
+                ? muscles.join(", ")
+                : "Treino registrado sem músculo marcado";
+
+            document.querySelectorAll(".body-svg .muscle-shape").forEach(part => {
+                part.classList.toggle("active", muscles.includes(part.dataset.muscle));
+            });
+
+            $("#workoutList").innerHTML = workouts.map(workout => `
+        <div class="item">
+          <div>
+            <strong>${escapeHtml(workout.exercise)}</strong>
+            <small>
+              ${workout.time} · ${workout.minutes} min · ${workout.intensity}
+              · ${workout.burned} kcal · +${workout.xp} XP
+              ${workout.muscles.length ? " · " + workout.muscles.join(", ") : ""}
+            </small>
+          </div>
+          <button class="btn secondary" onclick="removeWorkout('${workout.id}')">Remover</button>
+        </div>
+      `).join("");
+        }
+
+        function renderGoals() {
+            const activeGoals = state.goals.filter(goal => !goal.completed);
+            $("#activeGoalCount").textContent = activeGoals.length;
+
+            if (!state.goals.length) {
+                $("#goalList").innerHTML = `
+          <div class="card">
+            <h2>Nenhuma meta criada</h2>
+            <p class="muted">Crie uma meta para começar a medir sua evolução.</p>
+          </div>
+        `;
+                return;
+            }
+
+            $("#goalList").innerHTML = state.goals.map(goal => {
+                const current = getGoalProgress(goal);
+                const percent = Math.min(100, (current / goal.target) * 100);
+                const label = goal.type === "xp"
+                    ? "XP total"
+                    : goal.type === "workouts"
+                        ? "Treinos totais"
+                        : goal.type === "calories"
+                            ? "Calorias hoje"
+                            : "Manual";
+
+                return `
+          <div class="goal-card">
+            <div>
+              <strong>${escapeHtml(goal.title)}</strong>
+              <p class="muted">${label}</p>
+              <div class="progress">
+                <span style="width:${percent}%"></span>
+              </div>
+              <p class="mini-note">${current} / ${goal.target} ${goal.completed ? "· concluída" : ""}</p>
+            </div>
+
+            <div class="two-buttons">
+              ${goal.type === "custom" && !goal.completed ? `
+                <button class="btn secondary" onclick="addGoalProgress('${goal.id}', 1)">+1</button>
+                <button class="btn secondary" onclick="addGoalProgress('${goal.id}', 10)">+10</button>
+              ` : ""}
+              ${!goal.completed ? `<button class="btn secondary" onclick="completeGoal('${goal.id}')">Concluir</button>` : ""}
+              <button class="btn danger" onclick="removeGoal('${goal.id}')">Remover</button>
+            </div>
+          </div>
+        `;
+            }).join("");
+        }
+
+        function renderChallenges() {
+            document.querySelectorAll("[data-challenge]").forEach(input => {
+                const key = input.dataset.challenge;
+                input.checked = Boolean(state.daily.completed[key]);
+            });
+        }
+
+        function renderRanking() {
+            const localUsers = getUsers().map(user => ({
+                name: user.name,
+                xp: user.xp,
+                isYou: user.id === state.id
+            }));
+
+            const bots = [
+                { name: "Mamba", xp: 1840 },
+                { name: "Titã", xp: 1310 },
+                { name: "Invencível", xp: 620 },
+                { name: "Rookie", xp: 210 }
+            ];
+
+            const ranking = [...localUsers, ...bots].sort((a, b) => b.xp - a.xp);
+            const top3 = ranking.slice(0, 3);
+
+            $("#podium").innerHTML = top3.map((person, index) => `
+        <div class="podium-card ${index === 0 ? "first" : ""}">
+          <div class="place">${index + 1}</div>
+          <strong>${escapeHtml(person.name)}</strong>
+          <p class="muted">${person.xp} XP</p>
+          <p class="mini-note">${person.isYou ? "Você" : rankName(person.xp)}</p>
+        </div>
+      `).join("");
+
+            $("#rankingList").innerHTML = ranking.map((person, index) => `
+        <div class="rank-row">
+          <div class="rank-avatar">${index + 1}</div>
+          <div>
+            <strong>${escapeHtml(person.name)}</strong>
+            <p class="muted">${person.isYou ? "Você" : rankName(person.xp)}</p>
+          </div>
+          <strong>${person.xp} XP</strong>
+        </div>
+      `).join("");
+        }
+
+        function renderProfile() {
+            const level = levelFromXp(state.xp);
+
+            $("#profileInitial").textContent = state.name.slice(0, 1).toUpperCase();
+            $("#profileName").textContent = state.name;
+            $("#profileEmail").textContent = state.email;
+            $("#profileGender").textContent = state.gender;
+            $("#profileRank").textContent = `${rankName(state.xp)} · Nível ${level}`;
+
+            const badges = [
+                { name: "Primeiro Passo", icon: "🔥", unlocked: state.xp >= 10 },
+                { name: "Atleta", icon: "💪", unlocked: state.workouts.length >= 1 },
+                { name: "Nutrição", icon: "🍽️", unlocked: state.meals.length >= 1 },
+                { name: "Criador de Metas", icon: "🎯", unlocked: state.goals.length >= 1 },
+                { name: "Foco", icon: "⚡", unlocked: state.streak >= 2 },
+                { name: "Mamba", icon: "🐍", unlocked: state.xp >= 500 },
+                { name: "Titã", icon: "👑", unlocked: state.xp >= 1000 },
+                { name: "Invencível", icon: "🛡️", unlocked: state.xp >= 1500 }
+            ];
+
+            $("#badgeGrid").innerHTML = badges.map(badge => `
+        <div class="badge ${badge.unlocked ? "" : "locked"}">
+          <div>
+            <span class="icon">${badge.icon}</span>
+            <strong>${badge.name}</strong>
+            <p class="mini-note">${badge.unlocked ? "Desbloqueada" : "Bloqueada"}</p>
+          </div>
+        </div>
+      `).join("");
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        state = loadSession();
+
+        if (state) {
+            showApp();
+        } else {
+            showOnboarding();
+        }
+    </script>
+</body>
+
+</html>
